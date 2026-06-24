@@ -1,4 +1,3 @@
-# ui/map_template.py
 
 def get_map_html():
     return """

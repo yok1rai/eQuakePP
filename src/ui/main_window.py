@@ -1,4 +1,3 @@
-# ui/main_window.py
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QTableWidget, QTableWidgetItem, QHeaderView,
                              QLabel, QPushButton, QFrame, QMessageBox)
@@ -18,31 +17,26 @@ class MainWindow(QMainWindow):
         # --- Yapılandırma ---
         self.setWindowTitle("Linux Deprem Analiz Modülü v2.2 (Fixed)")
         self.resize(1280, 800)
-        self.refresh_rate = 60 # saniye
+        self.refresh_rate = 60
         self.alarm_limit = 4.0
         self.last_quake_id = None
-        self.is_map_ready = False # Harita yüklendi mi kontrolü
-        self.cached_quakes = []   # Harita yüklenene kadar veriyi burada tut
+        self.is_map_ready = False
+        self.cached_quakes = []
 
-        # --- Modüller ---
         self.data_manager = DataManager("deprem_arsiv.csv")
         self.sound_manager = SoundManager("alert.mp3")
         self.worker = EarthquakeWorker()
 
-        # --- Sinyal Bağlantıları ---
         self.worker.data_fetched.connect(self.on_data_received)
         self.worker.error_occurred.connect(self.on_error)
 
-        # --- Arayüz Kurulumu ---
         self.init_ui()
         self.apply_theme()
 
-        # --- Zamanlayıcı ---
         self.timer = QTimer()
         self.timer.timeout.connect(self.fetch_data)
         self.timer.start(self.refresh_rate * 1000)
 
-        # İlk veri çekimi
         self.fetch_data()
 
     def init_ui(self):
@@ -51,7 +45,6 @@ class MainWindow(QMainWindow):
         main_layout = QHBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # 1. SOL PANEL
         left_panel = QFrame()
         left_panel.setFixedWidth(450)
         left_layout = QVBoxLayout(left_panel)
@@ -74,10 +67,8 @@ class MainWindow(QMainWindow):
 
         main_layout.addWidget(left_panel)
 
-        # 2. SAĞ PANEL (Harita)
         self.map_view = QWebEngineView()
         self.map_view.setHtml(get_map_html())
-        # Harita tam yüklenince bu fonksiyon çalışacak:
         self.map_view.loadFinished.connect(self.on_map_loaded)
         main_layout.addWidget(self.map_view)
 
@@ -92,11 +83,9 @@ class MainWindow(QMainWindow):
         """)
 
     def on_map_loaded(self, success):
-        """Harita HTML'i yüklendiğinde tetiklenir."""
         if success:
             self.is_map_ready = True
             print("[SİSTEM] Harita motoru hazır.")
-            # Eğer hafızada bekleyen veri varsa şimdi haritaya çiz
             if self.cached_quakes:
                 self.update_map(self.cached_quakes)
 
@@ -108,7 +97,7 @@ class MainWindow(QMainWindow):
         self.lbl_status.setText(f"Güncel (Toplam: {len(quakes)})")
         if not quakes: return
 
-        self.cached_quakes = quakes # Veriyi hafızaya al
+        self.cached_quakes = quakes
 
         self.update_table(quakes)
         self.update_map(quakes)
@@ -124,14 +113,11 @@ class MainWindow(QMainWindow):
             row = self.table.rowCount()
             self.table.insertRow(row)
 
-            # --- GÜVENLİ VERİ ÇEKİMİ ---
             mag = float(quake.get('mag', 0))
             title = quake.get('title', 'Bilinmiyor')
 
-            # API ARTIK 'date_time' KULLANIYOR
             full_date = quake.get('date_time', quake.get('date', ''))
             try:
-                # "2026-02-03 19:35:44" -> "19:35:44"
                 time_str = full_date.split(" ")[1] if " " in full_date else full_date
             except:
                 time_str = full_date
@@ -151,7 +137,6 @@ class MainWindow(QMainWindow):
             self.table.item(row, 0).setData(Qt.ItemDataRole.UserRole, quake)
 
     def update_map(self, quakes):
-        # Eğer harita henüz yüklenmediyse işlemi iptal et
         if not self.is_map_ready:
             return
 
@@ -163,9 +148,6 @@ class MainWindow(QMainWindow):
                 title = q.get('title', '').replace("'", "")
                 mag = q.get('mag', 0)
 
-                # Koordinatlar API'da [Boylam, Enlem] gelir, Leaflet [Enlem, Boylam] ister.
-                # q['geojson']['coordinates'] -> [36.416, 40.6392] (Lon, Lat)
-                # addMarker(Lat, Lon) olmalı.
                 self.map_view.page().runJavaScript(f"addMarker({coords[1]}, {coords[0]}, '{title}', {mag});")
             except Exception as e:
                 print(f"Harita marker hatası: {e}")
@@ -178,7 +160,6 @@ class MainWindow(QMainWindow):
         self.map_view.page().runJavaScript(f"flyTo({coords[1]}, {coords[0]});")
 
     def check_alarm(self, latest_quake):
-        # Unique ID oluştururken date_time kullan
         date_val = latest_quake.get('date_time', latest_quake.get('date', 'nodate'))
         mag_val = latest_quake.get('mag', 0)
 

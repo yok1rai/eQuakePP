@@ -1,4 +1,3 @@
-# core/data_manager.py
 import csv
 import os
 
@@ -14,12 +13,9 @@ class DataManager:
                 writer.writerow(["Tarih", "Büyüklük", "Derinlik", "Yer", "Enlem", "Boylam"])
 
     def save_quake(self, quake):
-        """Gelen deprem objesini CSV'ye yazar."""
         try:
             coords = quake['geojson']['coordinates']
 
-            # API 'date' yerine 'date_time' göndermeye başlamış.
-            # İkisini de kontrol edip hangisi varsa onu alıyoruz.
             tarih = quake.get('date_time', quake.get('date', 'Bilinmiyor'))
 
             with open(self.filename, mode='a', newline='', encoding='utf-8') as file:
@@ -29,8 +25,8 @@ class DataManager:
                     quake.get('mag', 0),
                     quake.get('depth', 0),
                     quake.get('title', 'Bilinmiyor'),
-                    coords[1], # Latitude
-                    coords[0]  # Longitude
+                    coords[1],
+                    coords[0]
                 ])
             print(f"[LOG] Kaydedildi: {quake.get('title')}")
         except Exception as e:
