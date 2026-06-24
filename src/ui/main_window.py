@@ -14,7 +14,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # --- Yapılandırma ---
         self.setWindowTitle("Linux Deprem Analiz Modülü v2.2 (Fixed)")
         self.resize(1280, 800)
         self.refresh_rate = 60
