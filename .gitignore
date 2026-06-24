@@ -1,0 +1,70 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+
+# virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# pytest / mypy / tools
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# =========================
+# PyQt / Qt
+# =========================
+*.qmlc
+*.jsc
+*.qrc.py
+
+# Qt Creator / IDE
+*.pro.user
+*.pro.user.*
+*.autosave
+
+# =========================
+# Logs / runtime files
+# =========================
+*.log
+*.sqlite
+*.db
+
+# your project generated data
+deprem_arsiv.csv
+*.csv
+
+# =========================
+# OS junk
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# VS Code / JetBrains
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Python cache folders anywhere
+# =========================
+**/__pycache__/
+**/.pytest_cache/
+
+# =========================
+# Qt WebEngine / runtime cache
+# =========================
+QtWebEngine/
+QtWebEngineProcess*
